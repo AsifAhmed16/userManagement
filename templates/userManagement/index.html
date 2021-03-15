@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Index</title>
+</head>
+<nav>
+    {{ request.user.username }}
+    <br>
+    {% if request.user.is_staff %}
+        <span>You are a staff.</span>
+    {% else %}
+        <span>You are not staff.</span>
+    {% endif %} 
+</nav>
+<body>
+<h1>All Blogs</h1>
+{% for blog in blogs %}
+<p>{{ blog.body }}</p>
+{% endfor %}
+</body>
+</html>

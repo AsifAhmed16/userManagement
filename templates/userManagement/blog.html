@@ -2,13 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
+    <title>Write a blog</title>
 </head>
 <body>
     <form method="post">
         {% csrf_token %}
-        <input type="text" name="username" placeholder="Username"/>
-        <input type="text" name="password" placeholder="Password"/>
+        <input type="text" name="body" placeholder="Your Blog"/>
         <button type="submit">Submit</button>
     </form>
 </body>

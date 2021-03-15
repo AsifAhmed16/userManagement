@@ -3,14 +3,40 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from .models import Profile
+from .models import Profile, Blog
 
 
 @login_required(login_url="/login")
+def index(request):
+    blogs = {'blogs': Blog.objects.all()}
+    return render(request, 'userManagement/index.html', blogs)
+
+
+@login_required(login_url="/admin/login")
 def dashboard(request):
-    if request.user.username == 'asif':
-        return HttpResponse("<h1>Auth</h1>")
-    return HttpResponse("<h1>Unauth</h1>")
+    if request.method == 'POST':
+        body = request.POST['body']
+        blog = Blog
+        blog.body = body
+        blog.save()
+        if request.user is None or not request.user.is_staff:
+            return HttpResponse("<h1>Unauthorized</h1>")
+    return render(request, 'userManagement/blog.html')
+
+
+def login_admin(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(username=username, password=password)
+        if user is None:
+            return HttpResponse("<h1>Unauthorized</h1>")
+        if not user.is_staff:
+            return HttpResponse("<h1>You are not an admin</h1>")
+        else:
+            login(request, user)
+            return render(request, 'userManagement/index.html')
+    return render(request, 'userManagement/login.html')
 
 
 def login_user(request):
@@ -19,43 +45,46 @@ def login_user(request):
         password = request.POST['password']
         user = authenticate(username=username, password=password)
         if user is None:
-            return HttpResponse("<h1>Unauth</h1>")
+            return HttpResponse("<h1>Unauthorized</h1>")
+        else:
+            login(request, user)
+            return render(request, 'userManagement/index.html')
     return render(request, 'userManagement/login.html')
 
 
-# @login_required()
-# def edit_user(request):
-#     if request.method=='POST':
-#         user = request.user
-#         phone = "1234"
-#         address = 'abcd, bd'
-#         profile, created = Profile.objects.get_or_create(user=request.user)
-#     user = authenticate(username=username, password=password)
-#     if user is None:
-#         return HttpResponse("<h1>Unauth</h1>")
-#     else:
-#         login(request, user)
-#         return redirect('/')
+def edit_user(request):
+    if request.method == 'POST':
+        user = request.user
+        phone = request.POST['phone']
+        address = request.POST['address']
+        profile, created = Profile.objects.get_or_create(user=request.user)
+        user.profile.phone = phone
+        user.profile.address = address
+    return render(request, 'userManagement/edit_user.html')
 
 
 def register(request):
-    username = 'asif'
-    password = '1234'
-    email = 'r@g.c'
-    created = User.objects.create_user(username=username, password=password, email=email)
-    user = authenticate(username=username, password=password)
-    if user is None:
-        return HttpResponse("<h1>Unauth</h1>")
-    else:
-        login(request, user)
-        return redirect('/')
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        email = request.POST['email']
+        phone = request.POST['phone']
+        address = request.POST['address']
+        create_user = User.objects.create_user(username=username, password=password, email=email)
+        user = User.objects.latest('id')
+        profile, created = Profile.objects.get_or_create(user=user)
+        user.profile.phone = phone
+        user.profile.address = address
+        user.save()
+        user = authenticate(username=username, password=password)
+        if user is None:
+            return HttpResponse("<h1>Unauth</h1>")
+        else:
+            login(request, user)
+            return redirect('/')
+    return render(request, 'userManagement/register.html')
 
 
 def logout_user(request):
-    username = 'asif'
-    password = '1234'
-    user = authenticate(username=username, password=password)
-    if user is None:
-        return HttpResponse("<h1>Unauth</h1>")
-    else:
-        return HttpResponse("<h1>Auth</h1>")
+    logout(request)
+    return HttpResponse("<h1>Successfully logged out</h1>")
