@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from .models import Profile, Blog
+from .decorators import *
 
 
 @login_required(login_url="/login")
@@ -13,6 +14,7 @@ def index(request):
 
 
 @login_required(login_url="/admin/login")
+@allowed_users(allowed_roles=['admin'])
 def dashboard(request):
     if request.method == 'POST':
         body = request.POST['body']
@@ -39,11 +41,12 @@ def login_admin(request):
     return render(request, 'userManagement/login.html')
 
 
+@unauthenticated_user
 def login_user(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
-        user = authenticate(username=username, password=password)
+        user = authenticate(request, username=username, password=password)
         if user is None:
             return HttpResponse("<h1>Unauthorized</h1>")
         else:
@@ -63,6 +66,7 @@ def edit_user(request):
     return render(request, 'userManagement/edit_user.html')
 
 
+@unauthenticated_user
 def register(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -76,15 +80,10 @@ def register(request):
         user.profile.phone = phone
         user.profile.address = address
         user.save()
-        user = authenticate(username=username, password=password)
-        if user is None:
-            return HttpResponse("<h1>Unauth</h1>")
-        else:
-            login(request, user)
-            return redirect('/')
+        return redirect('login')
     return render(request, 'userManagement/register.html')
 
 
 def logout_user(request):
     logout(request)
-    return HttpResponse("<h1>Successfully logged out</h1>")
+    return redirect('login')

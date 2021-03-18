@@ -20,10 +20,10 @@ from userManagement import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('admin/login', views.login_admin),
-    path('', views.index),
-    path('dashboard', views.dashboard),
-    path('login', views.login_user),
-    path('register', views.register),
-    path('logout', views.logout_user),
-    path('edit_user', views.edit_user),
+    path('', views.index, name="index"),
+    path('dashboard', views.dashboard, name="dashboard"),
+    path('login', views.login_user, name="login"),
+    path('register', views.register, name="register"),
+    path('logout', views.logout_user, name="logout"),
+    path('edit_user', views.edit_user, name="edit_user"),
 ]
