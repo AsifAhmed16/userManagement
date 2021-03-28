@@ -1,0 +1,10 @@
+
+pip3 install psycopg2-binary
+pip3 install djangorestframework
+pip3 install django-cors-headers
+
+pip3 install coverage
+coverage run --omit='*/venv/*' manage.py test
+coverage html
+
+python3 manage.py createsuperuser

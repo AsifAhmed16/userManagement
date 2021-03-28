@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from .models import Profile, Blog
 from .decorators import *
 
@@ -80,6 +80,8 @@ def register(request):
         user.profile.phone = phone
         user.profile.address = address
         user.save()
+        group = Group.objects.get(name='client')
+        user.groups.add(group)
         return redirect('login')
     return render(request, 'userManagement/register.html')
 
